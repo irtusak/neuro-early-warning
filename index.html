@@ -141,6 +141,24 @@
   .chart-container { width:100%; aspect-ratio:3.5/1; background:var(--card); border-radius:10px; border:1px solid var(--border); overflow:hidden; margin-top:.75rem; }
   canvas.chart { width:100%; height:100%; }
 
+  /* WELCOME BANNER */
+  .welcome { background:linear-gradient(135deg, rgba(91,127,255,.08), rgba(91,127,255,.02)); border:1px solid rgba(91,127,255,.15); border-radius:12px; padding:1.5rem; margin-bottom:2rem; position:relative; }
+  .welcome h2 { color:var(--text); font-size:1.1rem; margin-bottom:.4rem; }
+  .welcome p { font-size:.88rem; color:var(--muted); line-height:1.7; }
+  .welcome .dismiss { position:absolute; top:.75rem; right:1rem; background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:.25rem; line-height:1; }
+  .welcome .dismiss:hover { color:var(--text); }
+  .welcome .guide-steps { display:flex; gap:1.25rem; margin-top:1rem; flex-wrap:wrap; }
+  .welcome .guide-step { display:flex; align-items:flex-start; gap:.5rem; font-size:.82rem; color:var(--text); flex:1; min-width:180px; }
+  .welcome .step-num { background:var(--accent); color:#fff; font-weight:700; font-size:.7rem; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+
+  /* TOOLTIP */
+  .kpi.clickable { position:relative; }
+  .kpi .tooltip { visibility:hidden; opacity:0; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%) translateY(100%); background:#1e2233; color:var(--text); font-size:.72rem; padding:.35rem .6rem; border-radius:6px; white-space:nowrap; z-index:10; transition:opacity .2s; pointer-events:none; border:1px solid var(--border); }
+  .kpi.clickable:hover .tooltip { visibility:visible; opacity:1; }
+
+  /* SECTION INTRO */
+  .section-intro { color:var(--muted); font-size:.84rem; margin-bottom:1rem; line-height:1.6; }
+
   /* FOOTER */
   .footer { text-align:center; padding:2rem; color:var(--muted); font-size:.75rem; border-top:1px solid var(--border); }
 
@@ -169,6 +187,20 @@
 <!-- SITUATION REPORT -->
 <div class="container">
   <section id="situation">
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome" id="welcome-banner">
+      <button class="dismiss" onclick="document.getElementById('welcome-banner').style.display='none'" title="Dismiss">&times;</button>
+      <h2>Welcome to NeuroWatch</h2>
+      <p>This dashboard monitors neurological symptom reports across Canada and flags unusual clusters that may indicate emerging health threats. It was built in response to the 2021 New Brunswick mystery illness, where cases accumulated for months before patterns were recognized.</p>
+      <div class="guide-steps">
+        <div class="guide-step"><span class="step-num">1</span><span>Start below with the <strong>Situation Report</strong> for a quick summary of current findings</span></div>
+        <div class="guide-step"><span class="step-num">2</span><span>Explore the <strong>Map</strong> to see alert zones and environmental layers across Canada</span></div>
+        <div class="guide-step"><span class="step-num">3</span><span>Review <strong>Alerts</strong> for a ranked list of all flagged regions</span></div>
+        <div class="guide-step"><span class="step-num">4</span><span>Expand <strong>Details</strong> for environmental, socioeconomic, and methodology information</span></div>
+      </div>
+    </div>
+
     <div class="sit-header">
       <div class="section-label">Situation Report</div>
       <h1>Neurological Cluster Detection — Canada</h1>
@@ -186,14 +218,17 @@
       <div class="kpi clickable" onclick="scrollToFinding()">
         <div class="value" style="color:var(--high)">1</div>
         <div class="label">High-Priority Alert</div>
+        <span class="tooltip">Click to view the New Brunswick cluster</span>
       </div>
       <div class="kpi clickable" onclick="scrollToAlerts()">
         <div class="value" style="color:var(--muted)">8</div>
         <div class="label">Low-Priority Alerts</div>
+        <span class="tooltip">Click to view all low-priority alerts</span>
       </div>
       <div class="kpi clickable" onclick="scrollToDetectors()">
         <div class="value" style="color:var(--accent)">3</div>
         <div class="label">Independent Detectors</div>
+        <span class="tooltip">Click to learn how detection works</span>
       </div>
     </div>
 
@@ -259,7 +294,7 @@
 <div id="map-section" class="map-section">
   <div class="map-bar">
     <h2 style="margin:0">Geographic Alert Map</h2>
-    <span class="hint">Click alert zones to zoom. Toggle environmental layers in top-right control.</span>
+    <span class="hint">Click an alert zone to zoom in. Use the control in the top-right to toggle environmental layers.</span>
   </div>
   <iframe id="map-frame" src="alert_map.html" frameborder="0" allowfullscreen></iframe>
 </div>
@@ -270,6 +305,7 @@
 <div class="container">
   <section id="alerts-section">
     <h2>All Alerts</h2>
+    <p class="section-intro">Each row represents a region flagged by the system. Click a location name to zoom to it on the map. Use the filters below to narrow results.</p>
 
     <div class="filter-bar">
       <label>Confidence:</label>
@@ -320,6 +356,7 @@
   <!-- COLLAPSIBLE DETAILS -->
   <section id="details">
     <h2>Investigation Details</h2>
+    <p class="section-intro">Click any section below to expand it. These provide supporting evidence and methodology behind the alerts above.</p>
 
     <!-- Environmental -->
     <div class="detail-section">
