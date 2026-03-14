@@ -159,6 +159,33 @@
   /* SECTION INTRO */
   .section-intro { color:var(--muted); font-size:.84rem; margin-bottom:1rem; line-height:1.6; }
 
+  /* EXPLAIN MODE TOGGLE */
+  .explain-toggle { display:flex; align-items:center; gap:.5rem; cursor:pointer; font-size:.8rem; color:var(--muted); user-select:none; }
+  .explain-toggle input { display:none; }
+  .explain-toggle .switch { width:34px; height:18px; background:var(--border); border-radius:9px; position:relative; transition:background .2s; flex-shrink:0; }
+  .explain-toggle .switch::after { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; background:var(--muted); border-radius:50%; transition:all .2s; }
+  .explain-toggle input:checked + .switch { background:var(--accent); }
+  .explain-toggle input:checked + .switch::after { left:16px; background:#fff; }
+  .explain-note { display:none; margin-top:.5rem; padding:.6rem .85rem; background:rgba(91,127,255,.06); border:1px solid rgba(91,127,255,.15); border-radius:8px; font-size:.82rem; color:var(--text); line-height:1.65; }
+  .explain-note strong { color:var(--accent); }
+  body.explain-on .explain-note { display:block; }
+
+  /* EXPORT BUTTON */
+  .export-btn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:.4rem .9rem; border-radius:6px; font-size:.8rem; cursor:pointer; transition:all .2s; font-weight:500; }
+  .export-btn:hover { border-color:var(--accent); background:var(--card-hover); }
+
+  /* PRINT STYLES */
+  @media print {
+    nav, .welcome, .filter-bar, .pf-expand, .export-btn, .map-section, .tooltip, .dismiss { display:none !important; }
+    .pf-detail, .detail-body { display:block !important; }
+    body { background:#fff; color:#111; }
+    .container { max-width:none; }
+    .kpi, .primary-finding, .detail-section, .risk-item { border-color:#ccc; background:#f9f9f9; }
+    .kpi .value, h1, h2, h3 { color:#111; }
+    .section-label, .kpi .label, .lbl, .score-label { color:#555; }
+    .badge { border:1px solid #999; }
+  }
+
   /* FOOTER */
   .footer { text-align:center; padding:2rem; color:var(--muted); font-size:.75rem; border-top:1px solid var(--border); }
 
@@ -182,6 +209,11 @@
     <a href="#alerts-section">Alerts</a>
     <a href="#details">Details</a>
   </div>
+  <label class="explain-toggle" title="Show explanations for each section">
+    <input type="checkbox" onchange="document.body.classList.toggle('explain-on', this.checked)">
+    <span class="switch"></span>
+    Explain Mode
+  </label>
 </nav>
 
 <!-- SITUATION REPORT -->
@@ -190,7 +222,7 @@
 
     <!-- WELCOME BANNER -->
     <div class="welcome" id="welcome-banner">
-      <button class="dismiss" onclick="document.getElementById('welcome-banner').style.display='none'" title="Dismiss">&times;</button>
+      <button class="dismiss" onclick="dismissWelcome()" title="Dismiss" aria-label="Close welcome banner">&times;</button>
       <h2>Welcome to NeuroWatch</h2>
       <p>This dashboard monitors neurological symptom reports across Canada and flags unusual clusters that may indicate emerging health threats. It was built in response to the 2021 New Brunswick mystery illness, where cases accumulated for months before patterns were recognized.</p>
       <div class="guide-steps">
@@ -202,7 +234,10 @@
     </div>
 
     <div class="sit-header">
-      <div class="section-label">Situation Report</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="section-label">Situation Report</div>
+        <button class="export-btn" onclick="window.print()" title="Print or save as PDF">Print / Export PDF</button>
+      </div>
       <h1>Neurological Cluster Detection — Canada</h1>
       <div class="meta">
         <span>Report generated: March 13, 2026</span>
@@ -232,6 +267,10 @@
       </div>
     </div>
 
+    <div class="explain-note">
+      <strong>Why these numbers?</strong> We analyzed 5,120 symptom reports from across Canada. Three independent AI detectors (Spatial Scan, Poisson Rate, and Autoencoder) each looked for unusual patterns separately. Only 1 region — Rural New Brunswick — was flagged as high-priority because two detectors independently agreed something abnormal was happening there. The other 8 alerts are in major cities where small clusters are expected due to higher populations.
+    </div>
+
     <!-- PRIMARY FINDING -->
     <div class="section-label" style="margin-top:2rem">Primary Finding</div>
     <div class="primary-finding" id="primary-finding">
@@ -250,7 +289,7 @@
         <div class="pf-metric"><div class="val" style="color:var(--high)">5.0/5</div><div class="lbl">Socio Vulnerability</div></div>
       </div>
       <div class="pf-expand" onclick="toggleDetail(this)">
-        View details — symptoms, risk factors, recommended actions
+        View details — symptoms, risk factors, investigation status
         <span class="arrow">&#9654;</span>
       </div>
       <div class="pf-detail">
@@ -281,6 +320,10 @@
       </div>
     </div>
 
+    <div class="explain-note">
+      <strong>Why is this the primary finding?</strong> Rural NB had 138 cases where only ~23 were expected — a rate ~5x above normal. The dominant symptoms (memory loss, tremor, ataxia, myoclonus) match prion-like disease patterns, similar to the real 2021 NB mystery illness. Two of three detectors independently flagged this same area, giving high confidence this is a real cluster, not noise. The environmental risk (4.6/5) means there are nearby industrial sites and contaminated water that could be contributing factors. The socioeconomic vulnerability (5.0/5) means the region has fewer doctors, lower income, and remote hospitals — so cases may actually be <em>underreported</em>.
+    </div>
+
     <!-- OTHER ALERTS SUMMARY -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem">
       <span style="font-size:.85rem;color:var(--muted)">Remaining 8 alerts are in urban centers (Calgary, Edmonton, Vancouver, etc.) with <strong style="color:var(--low)">LOW</strong> confidence — normal urban patterns. <a href="#alerts-section" style="color:var(--accent);text-decoration:none">View all alerts</a></span>
@@ -303,9 +346,17 @@
 
 <!-- ALERTS TABLE -->
 <div class="container">
+  <div class="explain-note" style="margin-top:1.5rem">
+    <strong>What does the map show?</strong> Each coloured circle is an alert zone. The circle colour matches its confidence level (maroon=critical, red=high, orange=medium, green=low). The circle has no fill so you can see the environmental layers underneath. You can toggle layers in the top-right: industrial sites (pink dots), water quality stations (blue shades using the CCME Water Quality Index — Poor, Marginal, Fair, Good), air quality monitors (purple shades using AQHI), socioeconomic vulnerability (dashed circles), and highways (white lines). The NB cluster is surrounded by environmental hazards — that's why we flag it.
+  </div>
+
   <section id="alerts-section">
     <h2>All Alerts</h2>
     <p class="section-intro">Each row represents a region flagged by the system. Click a location name to zoom to it on the map. Use the filters below to narrow results.</p>
+
+    <div class="explain-note">
+      <strong>How to read this table:</strong> <strong>Confidence</strong> = how certain we are this is a real cluster (HIGH means multiple detectors agreed and/or severe symptoms). <strong>Cases</strong> = number of symptom reports in that zone. <strong>Severity (/5)</strong> = average seriousness of symptoms (5 = most severe). <strong>Detectors</strong> = which of our 3 AI methods flagged this region (more detectors agreeing = higher confidence). <strong>Env Risk</strong> = proximity to environmental hazards like industrial sites, poor water quality, or bad air quality (click to see details). <strong>Period</strong> = when the cases occurred.
+    </div>
 
     <div class="filter-bar">
       <label>Confidence:</label>
@@ -349,6 +400,9 @@
     <div class="chart-container">
       <canvas id="timeline-chart" class="chart"></canvas>
     </div>
+    <div class="explain-note">
+      <strong>What does the timeline show?</strong> This chart shows the daily volume of neurological symptom reports across Canada over time. The red-shaded region (Oct–Dec 2025) marks when the NB cluster was active — you can see the bump in report volume during that period. This helps confirm the cluster wasn't a one-day spike but a sustained increase over weeks, which is more concerning and more consistent with an environmental or infectious cause.
+    </div>
   </section>
 
   <hr class="divider">
@@ -357,6 +411,10 @@
   <section id="details">
     <h2>Investigation Details</h2>
     <p class="section-intro">Click any section below to expand it. These provide supporting evidence and methodology behind the alerts above.</p>
+
+    <div class="explain-note">
+      <strong>Why are these sections here?</strong> The sections below give the full evidence behind the alerts. <strong>Environmental Risk</strong> shows what industrial sites, water contamination, and air quality issues exist near each alert zone — this helps investigators know where to sample. <strong>Socioeconomic Vulnerability</strong> shows why certain regions may underreport cases (fewer doctors, remote hospitals). <strong>Detection Methodology</strong> explains how the 3 AI detectors work — useful if someone asks "how do you know this is real?" <strong>About the Data</strong> clarifies that this uses synthetic data modeled on real Canadian patterns, not actual patient records.
+    </div>
 
     <!-- Environmental -->
     <div class="detail-section">
@@ -687,17 +745,67 @@ function initTimeline() {
   resize();
 }
 
-// Nav highlight
-document.querySelectorAll('nav a').forEach(link => {
-  link.addEventListener('click', () => {
-    document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
-    link.classList.add('active');
-  });
+// Welcome banner persistence
+function dismissWelcome() {
+  document.getElementById('welcome-banner').style.display = 'none';
+  localStorage.setItem('neurowatch-welcome-dismissed', '1');
+}
+
+// Env-risk link auto-expand: when clicking an env-alert link, expand the Environmental section
+document.addEventListener('click', function(e) {
+  const link = e.target.closest('a[href^="#env-alert-"]');
+  if (!link) return;
+  e.preventDefault();
+  // Find and expand the Environmental detail section
+  const envSection = document.querySelector('#details .detail-section');
+  if (envSection) {
+    const header = envSection.querySelector('.detail-header');
+    if (header && !header.classList.contains('open')) {
+      header.click();
+    }
+  }
+  // Scroll to the target after a short delay for expand animation
+  const targetId = link.getAttribute('href').substring(1);
+  setTimeout(() => {
+    const target = document.getElementById(targetId);
+    if (target) {
+      const navHeight = document.querySelector('nav').offsetHeight;
+      const y = target.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }, 300);
 });
+
+// Nav highlight on scroll
+const navSections = [
+  { id: 'situation', link: 'a[href="#situation"]' },
+  { id: 'map-section', link: 'a[href="#map-section"]' },
+  { id: 'alerts-section', link: 'a[href="#alerts-section"]' },
+  { id: 'details', link: 'a[href="#details"]' },
+];
+
+function updateNavOnScroll() {
+  const navHeight = document.querySelector('nav').offsetHeight;
+  let current = navSections[0].link;
+  for (const s of navSections) {
+    const el = document.getElementById(s.id);
+    if (el && el.getBoundingClientRect().top <= navHeight + 80) {
+      current = s.link;
+    }
+  }
+  document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+  const activeLink = document.querySelector('nav ' + current);
+  if (activeLink) activeLink.classList.add('active');
+}
+window.addEventListener('scroll', updateNavOnScroll, { passive: true });
 
 document.addEventListener('DOMContentLoaded', () => {
   renderAlerts(alerts);
   initTimeline();
+  // Restore welcome banner state
+  if (localStorage.getItem('neurowatch-welcome-dismissed') === '1') {
+    document.getElementById('welcome-banner').style.display = 'none';
+  }
 });
 </script>
 </body>
