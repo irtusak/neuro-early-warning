@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroWatch — MPH Career Strategy</title>
+<style>
+  :root {
+    --bg: #0b0d14;
+    --card: #141722;
+    --card-hover: #1a1e2e;
+    --border: #1e2233;
+    --text: #dcdee6;
+    --muted: #7a7e94;
+    --accent: #5b7fff;
+    --accent-dim: rgba(91,127,255,.1);
+    --high: #ff6b6b;
+    --medium: #ffa94d;
+    --low: #2ecc71;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.6; -webkit-font-smoothing:antialiased; }
+
+  /* NAV */
+  nav { position:sticky; top:0; z-index:100; background:rgba(11,13,20,.95); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); display:flex; align-items:center; height:52px; padding:0 2rem; gap:2.5rem; }
+  nav .logo { font-weight:700; font-size:1rem; color:var(--accent); letter-spacing:.5px; }
+  nav .logo span { color:var(--muted); font-weight:400; font-size:.8rem; margin-left:.5rem; }
+  nav .nav-links { display:flex; gap:1.5rem; margin-left:1.5rem; }
+  nav a { color:var(--muted); text-decoration:none; font-size:.82rem; font-weight:500; letter-spacing:.3px; transition:color .2s; text-transform:uppercase; }
+  nav a:hover, nav a.active { color:var(--text); }
+
+  /* LAYOUT */
+  .container { max-width:900px; margin:0 auto; padding:0 2rem 4rem; }
+
+  /* HEADER */
+  .page-header { padding:2.5rem 0 1.5rem; }
+  .page-header h1 { font-size:1.6rem; font-weight:700; letter-spacing:-.02em; margin-bottom:.25rem; }
+  .page-header p { color:var(--muted); font-size:.85rem; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem 1.25rem; margin-bottom:2rem; }
+  .progress-label { display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; }
+  .progress-label span { font-size:.8rem; color:var(--muted); font-weight:500; }
+  .progress-label .pct { font-size:1.1rem; font-weight:700; color:var(--accent); }
+  .progress-bar { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg, var(--accent), #818cf8); border-radius:4px; transition:width .3s ease; width:0%; }
+
+  /* PHASE */
+  .phase { background:var(--card); border:1px solid var(--border); border-radius:12px; margin-bottom:1.25rem; overflow:hidden; }
+  .phase-header { padding:1rem 1.25rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; user-select:none; transition:background .2s; }
+  .phase-header:hover { background:var(--card-hover); }
+  .phase-header h2 { font-size:1.05rem; font-weight:600; color:var(--accent); margin:0; }
+  .phase-header .phase-tag { font-size:.7rem; text-transform:uppercase; letter-spacing:1px; font-weight:600; padding:.2rem .6rem; border-radius:4px; flex-shrink:0; }
+  .phase-tag.now { background:rgba(46,204,113,.1); color:var(--low); border:1px solid rgba(46,204,113,.2); }
+  .phase-tag.during { background:rgba(255,169,77,.1); color:var(--medium); border:1px solid rgba(255,169,77,.2); }
+  .phase-tag.after { background:rgba(91,127,255,.1); color:var(--accent); border:1px solid rgba(91,127,255,.2); }
+  .phase-header .arrow { font-size:.7rem; color:var(--muted); transition:transform .25s; margin-left:1rem; }
+  .phase.open .phase-header .arrow { transform:rotate(90deg); }
+  .phase-body { display:none; padding:0 1.25rem 1.25rem; }
+  .phase.open .phase-body { display:block; }
+
+  /* SECTION WITHIN PHASE */
+  .section-title { font-size:.88rem; font-weight:600; margin:1.25rem 0 .5rem; padding-bottom:.35rem; border-bottom:1px solid var(--border); }
+  .section-title:first-child { margin-top:0; }
+
+  /* TASK */
+  .task { display:flex; align-items:flex-start; gap:.65rem; padding:.45rem 0; }
+  .task input[type="checkbox"] { appearance:none; -webkit-appearance:none; width:18px; height:18px; min-width:18px; border:2px solid var(--border); border-radius:4px; background:transparent; cursor:pointer; margin-top:2px; transition:all .15s; position:relative; }
+  .task input[type="checkbox"]:checked { background:var(--accent); border-color:var(--accent); }
+  .task input[type="checkbox"]:checked::after { content:''; position:absolute; left:4px; top:1px; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .task label { font-size:.85rem; cursor:pointer; transition:opacity .15s; }
+  .task input:checked + label { opacity:.5; text-decoration:line-through; text-decoration-color:var(--muted); }
+  .task label strong { font-weight:600; color:var(--text); }
+  .task label .detail { color:var(--muted); }
+
+  /* SUBSECTION */
+  .subsection { margin:.75rem 0 .25rem; font-size:.78rem; font-weight:600; color:var(--medium); text-transform:uppercase; letter-spacing:.8px; }
+
+  /* INTERVIEW SECTION */
+  .talking-point { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:.85rem 1rem; margin-bottom:.65rem; }
+  .talking-point .tp-num { color:var(--accent); font-weight:700; font-size:.8rem; margin-bottom:.2rem; }
+  .talking-point .tp-title { font-weight:600; font-size:.9rem; margin-bottom:.2rem; }
+  .talking-point .tp-text { font-size:.83rem; color:var(--muted); }
+
+  /* EDGE BOX */
+  .edge-box { background:var(--accent-dim); border:1px solid rgba(91,127,255,.25); border-radius:10px; padding:1.25rem; margin-top:2rem; }
+  .edge-box h3 { color:var(--accent); font-size:.95rem; margin-bottom:.5rem; }
+  .edge-box ul { list-style:none; }
+  .edge-box li { font-size:.85rem; padding:.2rem 0; padding-left:1rem; position:relative; }
+  .edge-box li::before { content:''; position:absolute; left:0; top:.55rem; width:6px; height:6px; border-radius:50%; background:var(--accent); }
+
+  /* RESPONSIVE */
+  @media(max-width:600px) {
+    nav { padding:0 1rem; gap:1rem; }
+    .container { padding:0 1rem 3rem; }
+    .phase-header { padding:.85rem 1rem; }
+    .phase-body { padding:0 1rem 1rem; }
+    .phase-header h2 { font-size:.92rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">NeuroWatch <span>Career Strategy</span></div>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="career-plan.html" class="active">Career Plan</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1>MPH Career Strategy</h1>
+    <p>Your roadmap from NeuroWatch to public health career — check off tasks as you go</p>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Overall Progress</span>
+      <span class="pct" id="pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="fill"></div>
+    </div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase open" id="phase1">
+    <div class="phase-header" onclick="togglePhase('phase1')">
+      <h2>Phase 1: Now &ndash; Fall 2026</h2>
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <span class="phase-tag now">Current</span>
+        <span class="arrow">&#9654;</span>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div class="section-title">1. Polish NeuroWatch as a Portfolio Piece</div>
+      <div class="task"><input type="checkbox" id="t1" onchange="save()"><label for="t1">Write a <strong>1-page project brief (PDF)</strong> <span class="detail">— what it does, why it matters, what you learned</span></label></div>
+      <div class="task"><input type="checkbox" id="t2" onchange="save()"><label for="t2">Add a proper <strong>README</strong> to the GitHub repo <span class="detail">— screenshots, architecture diagram, and a "Background" section citing the real NB mystery illness</span></label></div>
+      <div class="task"><input type="checkbox" id="t3" onchange="save()"><label for="t3">Write a <strong>blog post or Medium article</strong>: <span class="detail">"What if AI had caught New Brunswick's mystery illness sooner?"</span></label></div>
+
+      <div class="section-title">2. Start Building Your Public Health Network</div>
+      <div class="task"><input type="checkbox" id="t4" onchange="save()"><label for="t4"><strong>LinkedIn</strong> <span class="detail">— update profile to reflect interest in health surveillance, disease intelligence, and health informatics. Share NeuroWatch</span></label></div>
+      <div class="task"><input type="checkbox" id="t5" onchange="save()"><label for="t5">Join <strong>CPHA</strong> as a student member <span class="detail">— access to CJPH and conferences</span></label></div>
+      <div class="task"><input type="checkbox" id="t6" onchange="save()"><label for="t6">Follow <strong>ProMED / GPHIN / HealthMap</strong> <span class="detail">— understand how real disease surveillance systems work</span></label></div>
+      <div class="task"><input type="checkbox" id="t7" onchange="save()"><label for="t7">Follow key figures on <strong>Twitter/X</strong> <span class="detail">— infectious disease epi, One Health, health informatics</span></label></div>
+
+      <div class="section-title">3. Learn the Policy Landscape</div>
+      <div class="task"><input type="checkbox" id="t8" onchange="save()"><label for="t8">Read Canada's <strong>Pan-Canadian Health Data Strategy</strong></label></div>
+      <div class="task"><input type="checkbox" id="t9" onchange="save()"><label for="t9">Familiarize yourself with <strong>PHAC</strong> structure and mandate</label></div>
+      <div class="task"><input type="checkbox" id="t10" onchange="save()"><label for="t10">Read the <strong>2023 Chief Public Health Officer's Report</strong></label></div>
+      <div class="task"><input type="checkbox" id="t11" onchange="save()"><label for="t11">Understand <strong>Bill C-293</strong> (Pandemic Prevention and Preparedness Act) <span class="detail">— creating new roles and funding</span></label></div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase" id="phase2">
+    <div class="phase-header" onclick="togglePhase('phase2')">
+      <h2>Phase 2: During the MPH Program</h2>
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <span class="phase-tag during">2026-2028</span>
+        <span class="arrow">&#9654;</span>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div class="section-title">4. Course Selection Strategy</div>
+      <div class="task"><input type="checkbox" id="t12" onchange="save()"><label for="t12"><strong>Epidemiology methods</strong> <span class="detail">— go deep, spatial epi if offered</span></label></div>
+      <div class="task"><input type="checkbox" id="t13" onchange="save()"><label for="t13"><strong>Health policy analysis</strong> <span class="detail">— how policy decisions are made, how to write policy briefs</span></label></div>
+      <div class="task"><input type="checkbox" id="t14" onchange="save()"><label for="t14"><strong>Health informatics / digital health</strong></label></div>
+      <div class="task"><input type="checkbox" id="t15" onchange="save()"><label for="t15"><strong>Environmental health</strong> <span class="detail">— ties directly to NeuroWatch's environmental risk layer</span></label></div>
+      <div class="task"><input type="checkbox" id="t16" onchange="save()"><label for="t16"><strong>Indigenous health</strong> <span class="detail">— critical for Canadian public health credibility and NB context</span></label></div>
+      <div class="task"><input type="checkbox" id="t17" onchange="save()"><label for="t17"><strong>Biostatistics</strong> <span class="detail">— formal stats training adds rigor to your ML skills</span></label></div>
+
+      <div class="section-title">5. Internship Targets (Summer 2027)</div>
+      <div class="subsection">Top Tier</div>
+      <div class="task"><input type="checkbox" id="t18" onchange="save()"><label for="t18">Apply to <strong>PHAC</strong> <span class="detail">— Centre for Immunization & Respiratory Infectious Diseases or Health Security Infrastructure Branch (runs GPHIN)</span></label></div>
+      <div class="task"><input type="checkbox" id="t19" onchange="save()"><label for="t19">Apply to <strong>WHO</strong> <span class="detail">— Health Emergencies Programme, Geneva or regional offices</span></label></div>
+      <div class="task"><input type="checkbox" id="t20" onchange="save()"><label for="t20">Apply to <strong>CDC</strong> <span class="detail">— Center for Forecasting and Outbreak Analytics</span></label></div>
+
+      <div class="subsection">Strong Options</div>
+      <div class="task"><input type="checkbox" id="t21" onchange="save()"><label for="t21">Apply to <strong>Provincial health authorities</strong> <span class="detail">— NB Dept. of Health, Ontario Public Health, BCCDC</span></label></div>
+      <div class="task"><input type="checkbox" id="t22" onchange="save()"><label for="t22">Apply to <strong>CIHI</strong> <span class="detail">— Canadian Institute for Health Information</span></label></div>
+      <div class="task"><input type="checkbox" id="t23" onchange="save()"><label for="t23">Apply to <strong>ICES</strong> <span class="detail">— Institute for Clinical Evaluative Sciences, Ontario</span></label></div>
+      <div class="task"><input type="checkbox" id="t24" onchange="save()"><label for="t24">Apply to <strong>First Nations Health Authority</strong> <span class="detail">— health surveillance for Indigenous communities (BC)</span></label></div>
+
+      <div class="subsection">Private / NGO</div>
+      <div class="task"><input type="checkbox" id="t25" onchange="save()"><label for="t25">Apply to <strong>BlueDot</strong> (Toronto) <span class="detail">— AI surveillance company that detected COVID early</span></label></div>
+      <div class="task"><input type="checkbox" id="t26" onchange="save()"><label for="t26">Apply to <strong>IHME</strong> (Seattle) <span class="detail">— Institute for Health Metrics and Evaluation</span></label></div>
+      <div class="task"><input type="checkbox" id="t27" onchange="save()"><label for="t27">Apply to <strong>Resolve to Save Lives</strong> <span class="detail">— epidemic preparedness NGO</span></label></div>
+
+      <div class="section-title">6. Capstone Project Strategy</div>
+      <div class="task"><input type="checkbox" id="t28" onchange="save()"><label for="t28">Pitch <strong>NeuroWatch as your capstone project</strong> <span class="detail">— you already have a working system, the capstone is your chance to extend it with real data and academic rigor</span></label></div>
+      <div class="task"><input type="checkbox" id="t29" onchange="save()"><label for="t29">Partner with a <strong>provincial health authority</strong> to integrate <strong>real anonymized data</strong> <span class="detail">— transforms NeuroWatch from a demo into a validated tool</span></label></div>
+      <div class="task"><input type="checkbox" id="t47" onchange="save()"><label for="t47">Identify a <strong>capstone supervisor early</strong> (first semester) <span class="detail">— send them the project brief, look for faculty in epi, health informatics, or environmental health</span></label></div>
+      <div class="task"><input type="checkbox" id="t48" onchange="save()"><label for="t48">Frame the capstone around a <strong>policy-relevant question</strong> <span class="detail">— e.g., "Can AI-based surveillance reduce detection lag for neurological clusters in rural Canada?"</span></label></div>
+
+      <div class="section-title">7. Research & Publishing</div>
+      <div class="task"><input type="checkbox" id="t49" onchange="save()"><label for="t49">Work with your capstone supervisor to turn it into a <strong>peer-reviewed paper</strong> <span class="detail">— target JMIR Public Health and Surveillance, BMC Public Health, or Canada Communicable Disease Report</span></label></div>
+      <div class="task"><input type="checkbox" id="t30" onchange="save()"><label for="t30">Present at <strong>CPHA annual conference</strong> student poster session</label></div>
+
+      <div class="section-title">8. Skills to Add</div>
+      <div class="task"><input type="checkbox" id="t31" onchange="save()"><label for="t31"><strong>Policy brief writing</strong> <span class="detail">— the 2-pager format government decision-makers actually read</span></label></div>
+      <div class="task"><input type="checkbox" id="t32" onchange="save()"><label for="t32"><strong>GIS / spatial analysis</strong> <span class="detail">— QGIS or ArcGIS, complements your Folium/Python mapping</span></label></div>
+      <div class="task"><input type="checkbox" id="t33" onchange="save()"><label for="t33"><strong>SGBA+ framework</strong> <span class="detail">— Sex and Gender-Based Analysis Plus, used across Canadian federal health policy</span></label></div>
+      <div class="task"><input type="checkbox" id="t34" onchange="save()"><label for="t34"><strong>French</strong> <span class="detail">— bilingualism is a massive advantage for federal public health jobs</span></label></div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase" id="phase3">
+    <div class="phase-header" onclick="togglePhase('phase3')">
+      <h2>Phase 3: After Graduating (2028+)</h2>
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <span class="phase-tag after">Future</span>
+        <span class="arrow">&#9654;</span>
+      </div>
+    </div>
+    <div class="phase-body">
+
+      <div class="section-title">9. Job Roles You'd Be Competitive For</div>
+      <div class="task"><input type="checkbox" id="t35" onchange="save()"><label for="t35"><strong>Epidemiologist / Surveillance Analyst</strong> <span class="detail">— PHAC, provincial health authorities</span></label></div>
+      <div class="task"><input type="checkbox" id="t36" onchange="save()"><label for="t36"><strong>Health Data Scientist</strong> <span class="detail">— CIHI, provincial health systems, BlueDot</span></label></div>
+      <div class="task"><input type="checkbox" id="t37" onchange="save()"><label for="t37"><strong>Policy Analyst (Health)</strong> <span class="detail">— Health Canada, Treasury Board</span></label></div>
+      <div class="task"><input type="checkbox" id="t38" onchange="save()"><label for="t38"><strong>Disease Intelligence Officer</strong> <span class="detail">— WHO, ECDC, CDC</span></label></div>
+      <div class="task"><input type="checkbox" id="t39" onchange="save()"><label for="t39"><strong>Health Informatics Specialist</strong> <span class="detail">— hospitals, health authorities, digital health startups</span></label></div>
+
+      <div class="section-title">10. What Makes You Stand Out</div>
+      <div class="task"><input type="checkbox" id="t40" onchange="save()"><label for="t40">Articulate your <strong>deployed project</strong> advantage <span class="detail">— not just a class assignment, a real working system</span></label></div>
+      <div class="task"><input type="checkbox" id="t41" onchange="save()"><label for="t41">Highlight <strong>ML/AI applied to real public health</strong></label></div>
+      <div class="task"><input type="checkbox" id="t42" onchange="save()"><label for="t42">Emphasize understanding of <strong>environmental determinants + health equity</strong></label></div>
+      <div class="task"><input type="checkbox" id="t43" onchange="save()"><label for="t43">Show you can <strong>build the tools</strong>, not just analyze output</label></div>
+
+      <div class="section-title">11. Certifications to Consider</div>
+      <div class="task"><input type="checkbox" id="t44" onchange="save()"><label for="t44"><strong>CPH (Certified in Public Health)</strong> <span class="detail">— validates your MPH after graduating</span></label></div>
+      <div class="task"><input type="checkbox" id="t45" onchange="save()"><label for="t45"><strong>SAS / R certifications</strong> <span class="detail">— some government jobs list these specifically</span></label></div>
+      <div class="task"><input type="checkbox" id="t46" onchange="save()"><label for="t46"><strong>PMP or PRINCE2</strong> <span class="detail">— if you want to lead health program implementation</span></label></div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW PREP -->
+  <div class="phase open" id="phase4">
+    <div class="phase-header" onclick="togglePhase('phase4')">
+      <h2>Interview Prep: NeuroWatch Talking Points</h2>
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <span class="phase-tag now">Ready</span>
+        <span class="arrow">&#9654;</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <p style="font-size:.83rem;color:var(--muted);margin-bottom:1rem;">When asked "tell me about a project" — use these five points:</p>
+
+      <div class="talking-point">
+        <div class="tp-num">01</div>
+        <div class="tp-title">The Problem</div>
+        <div class="tp-text">NB mystery illness went undetected for months because no system was watching for spatial clusters of rare neurological symptoms.</div>
+      </div>
+      <div class="talking-point">
+        <div class="tp-num">02</div>
+        <div class="tp-title">What You Built</div>
+        <div class="tp-text">Three independent AI detectors that cross-validate each other, reducing false alarms (FDR-controlled at 5%).</div>
+      </div>
+      <div class="talking-point">
+        <div class="tp-num">03</div>
+        <div class="tp-title">Why It Matters</div>
+        <div class="tp-text">The system found the NB cluster automatically with HIGH confidence — exactly the kind of early signal that was missed in real life.</div>
+      </div>
+      <div class="talking-point">
+        <div class="tp-num">04</div>
+        <div class="tp-title">The Policy Layer</div>
+        <div class="tp-text">You didn't just build a detector — you added environmental risk scoring and socioeconomic vulnerability analysis because health threats don't exist in isolation from their determinants.</div>
+      </div>
+      <div class="talking-point">
+        <div class="tp-num">05</div>
+        <div class="tp-title">Expert Validation</div>
+        <div class="tp-text">The system was refined against Health Canada expert feedback — privacy, statistical rigor, data leakage prevention.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YOUR EDGE -->
+  <div class="edge-box">
+    <h3>Your Edge</h3>
+    <ul>
+      <li>Most MPH students don't enter with a deployed, functional surveillance tool</li>
+      <li>You sit at the intersection of health informatics + epidemiology + policy — a high-demand niche</li>
+      <li>You have both the technical ability to build AND the domain knowledge to contextualize</li>
+      <li>NeuroWatch is not a class assignment — it's a working system that addresses a real public health gap</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'neurowatch-career-tasks';
+const totalTasks = document.querySelectorAll('.task input[type="checkbox"]').length;
+
+function save() {
+  const state = {};
+  document.querySelectorAll('.task input[type="checkbox"]').forEach(cb => {
+    state[cb.id] = cb.checked;
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  updateProgress();
+}
+
+function load() {
+  try {
+    const state = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (state) {
+      Object.keys(state).forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) cb.checked = state[id];
+      });
+    }
+  } catch(e) {}
+  updateProgress();
+}
+
+function updateProgress() {
+  const checked = document.querySelectorAll('.task input:checked').length;
+  const pct = Math.round((checked / totalTasks) * 100);
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('fill').style.width = pct + '%';
+}
+
+function togglePhase(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+load();
+</script>
+</body>
+</html>
