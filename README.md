@@ -94,7 +94,8 @@ The interactive dashboard presents findings as an executive-friendly **Situation
 - Collapsible environmental detail panels
 - Explain Mode toggle for understanding every metric
 
-![Alert Map](alert_map.png)
+![NeuroWatch Dashboard](docs/dashboard-screenshot.png)
+
 ![Alert Timeline](alert_timeline.png)
 
 ---
